@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
-public class Main{
+public class Main {
     private static final int MAX_PANCAKES = 12;
     private static final int MAX_PANCAKES_PER_USER = 5;
     private static final int NUM_USERS = 3;
@@ -16,32 +16,44 @@ public class Main{
         LocalDateTime startTime = LocalDateTime.now();
         System.out.println("Starting Time: " + startTime.format(formatter));
 
-        int pancakesMade = random.nextInt(MAX_PANCAKES + 1);
-        System.out.println("Number of pancakes made by the shopkeeper: " + pancakesMade);
+        LocalDateTime endTime = startTime.plusSeconds(30);
+        System.out.println("Ending Time: " + endTime.format(formatter));
 
-        int[] pancakeOrders = new int[NUM_USERS];
-        for (int i = 0; i < NUM_USERS; i++) {
-            pancakeOrders[i] = random.nextInt(MAX_PANCAKES_PER_USER + 1);
-        }
+        int[] userPancakes = new int[NUM_USERS];
+        int remainingPancakes = MAX_PANCAKES;
 
-        boolean isAllOrdersMet = true;
-        int totalPancakesEaten = 0;
-        int totalPancakeWaste = 0;
-        for (int i = 0; i < NUM_USERS; i++) {
-            int pancakesToEat = Math.min(pancakeOrders[i], MAX_PANCAKES_PER_USER);
-            totalPancakesEaten += pancakesToEat;
-            if (pancakesToEat < pancakeOrders[i]) {
-                isAllOrdersMet = false;
-                totalPancakeWaste += pancakeOrders[i] - pancakesToEat;
+        while (LocalDateTime.now().isBefore(endTime) && remainingPancakes > 0) {
+            for (int i = 0; i < NUM_USERS; i++) {
+                if (userPancakes[i] < MAX_PANCAKES_PER_USER) {
+                    int maxPancakesToEat = Math.min(MAX_PANCAKES_PER_USER - userPancakes[i], remainingPancakes);
+                    int pancakesToEat = random.nextInt(maxPancakesToEat) + 1;
+//                    int pancakesToEat = 1;
+
+                    userPancakes[i] += pancakesToEat;
+                    remainingPancakes -= pancakesToEat;
+                }
             }
         }
 
-        LocalDateTime endTime = LocalDateTime.now();
-        System.out.println("Ending Time: " + endTime.format(formatter));
+        LocalDateTime currentTime = LocalDateTime.now();
+        System.out.println("Current Time: " + currentTime.format(formatter));
 
-        System.out.println("Shopkeeper successfully met the needs of the 3 users: " + isAllOrdersMet);
-        System.out.println("Total pancakes eaten: " + totalPancakesEaten);
+        boolean allOrdersMet = true;
+        int totalPancakeWaste = 0;
+        for (int i = 0; i < NUM_USERS; i++) {
+            if (userPancakes[i] < MAX_PANCAKES_PER_USER) {
+                allOrdersMet = false;
+            } else if (userPancakes[i] > MAX_PANCAKES_PER_USER) {
+                totalPancakeWaste += userPancakes[i] - MAX_PANCAKES_PER_USER;
+            }
+        }
+
+        System.out.println("Shopkeeper successfully met the needs of the 3 users: " + allOrdersMet);
+        System.out.println("Total pancakes eaten by each user:");
+        for (int i = 0; i < NUM_USERS; i++) {
+            System.out.println("User " + (i + 1) + ": " + userPancakes[i]);
+        }
         System.out.println("Total pancakes wasted: " + totalPancakeWaste);
-        System.out.println("Number of pancake orders not met: " + (isAllOrdersMet ? 0 : NUM_USERS));
+        System.out.println("Number of pancake orders not met: " + (allOrdersMet ? 0 : NUM_USERS));
     }
 }
